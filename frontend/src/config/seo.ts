@@ -71,6 +71,14 @@ export const PAGE_METADATA: Record<string, SEOMetadata> = {
     ogType: 'website',
   },
 
+  blog: {
+    title: 'Blog & Newsletter | Guiding Stars',
+    description:
+      'News, updates, and stories from Guiding Stars — mentorship highlights, cohort milestones, and community announcements.',
+    keywords: ['blog', 'newsletter', 'mentorship news', 'guiding stars updates'],
+    ogType: 'website',
+  },
+
   mentors: {
     title: 'Meet Our Mentors | Guiding Stars',
     description:

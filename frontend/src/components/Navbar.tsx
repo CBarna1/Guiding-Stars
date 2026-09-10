@@ -64,6 +64,7 @@ const Navbar = () => {
           <Link to="/testimonials" className="font-semibold hover:text-orange-300 transition">Testimonials</Link>
           <Link to="/contact" className="font-semibold hover:text-orange-300 transition">Contact Us</Link>
           <Link to="/graduation" className="font-semibold hover:text-orange-300 transition">Events</Link>
+          <Link to="/blog" className="font-semibold hover:text-orange-300 transition">Blog</Link>
 
           {/* Apply Now Button */}
           <Link
@@ -135,6 +136,13 @@ const Navbar = () => {
             onClick={() => setMobileOpen(false)}
           >
             Events
+          </Link>
+          <Link
+            to="/blog"
+            className="block font-semibold py-2 border-b border-gray-500 hover:text-orange-300 transition"
+            onClick={() => setMobileOpen(false)}
+          >
+            Blog
           </Link>
 
           <Link

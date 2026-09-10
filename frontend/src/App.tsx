@@ -11,6 +11,9 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
 import About from './pages/About';
+import Blog from './pages/Blog';
+import BlogPost from './pages/BlogPost';
+import BlogManagement from './pages/BlogManagement';
 import ApplyPage from './pages/ApplyPage';
 import Contact from './pages/Contact';
 import Graduation from './pages/Graduation';
@@ -151,7 +154,8 @@ function App() {
                        location.startsWith('/progress') || 
                        location.startsWith('/content') ||
                        location.startsWith('/submissions') ||
-                       location.startsWith('/mentor-applications');
+                       location.startsWith('/mentor-applications') ||
+                       location.startsWith('/blog-management');
   const isPortalRoute = location.startsWith('/mentee/dashboard') || 
                         location.startsWith('/mentee/messages') ||
                         location.startsWith('/mentor/portal') ||
@@ -170,6 +174,8 @@ function App() {
         {/* Public routes */}
   <Route path="/home" element={<PublicLayout><Home /></PublicLayout>} />
   <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
+  <Route path="/blog" element={<PublicLayout><Blog /></PublicLayout>} />
+  <Route path="/blog/:slug" element={<PublicLayout><BlogPost /></PublicLayout>} />
   <Route path="/activate/:token" element={<VerifyEmail />} />
   <Route path="/apply" element={<PublicLayout><ApplyPage /></PublicLayout>} />
   <Route path="/mentor-apply" element={<PublicLayout><MentorApply /></PublicLayout>} />
@@ -227,6 +233,11 @@ function App() {
         <Route path="/mentor-applications" element={
           <ProtectedRoute requiredRole="admin">
             <AdminLayout><MentorApplications /></AdminLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/blog-management" element={
+          <ProtectedRoute requiredRole="admin">
+            <AdminLayout><BlogManagement /></AdminLayout>
           </ProtectedRoute>
         } />
 

@@ -70,6 +70,11 @@ const Footer = () => {
                   {content.footer_link_contact || 'Contact'}
                 </Link>
               </li>
+              <li>
+                <Link to="/blog" className="hover:text-orange-400 transition">
+                  {content.footer_link_blog || 'Blog'}
+                </Link>
+              </li>
             </ul>
           </div>
 
