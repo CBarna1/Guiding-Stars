@@ -18,9 +18,7 @@ async function migrateDateSupport() {
     const sql = `
       ALTER TABLE content_management
       MODIFY COLUMN content_type ENUM('text', 'textarea', 'image', 'video', 'json', 'date')
-      DEFAULT 'textarea'
-      CHARACTER SET utf8mb4
-      COLLATE utf8mb4_unicode_ci;
+      DEFAULT 'textarea';
     `;
 
     await sequelize.query(sql);
