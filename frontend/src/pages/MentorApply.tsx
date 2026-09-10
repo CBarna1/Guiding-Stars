@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import api from '../services/api';
 
@@ -72,8 +71,6 @@ const MentorApply = () => {
 
   return (
     <div className="bg-white min-h-screen">
-      <Navbar />
-
       {/* Hero Section */}
       <section className="relative">
         <img

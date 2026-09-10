@@ -1,19 +1,12 @@
 // src/pages/Team.tsx
-import { useEffect, useState } from 'react';
-import Navbar from '../components/Navbar';
+import { useEffect, useMemo, useState } from 'react';
 import Footer from '../components/Footer';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import Reveal from '../components/Reveal';
+import ScrollProgress from '../components/ScrollProgress';
+import HeroCarousel from '../components/HeroCarousel';
+import Tag from '../components/Tag';
 import { SEOHelmet } from '../hooks/useSEO';
 import api from '../services/api';
-
-// Hero carousel images
-const heroImages = [
-  '/img/Top-Bunner-1.jpg',
-  '/img/corporate image.jpeg',
-  '/img/guiding stars team.jpg',
-  '/img/guiding stars event.jpg',
-];
 
 // Team member images (use root-relative public paths)
 const twaambo = "/img/TEAM/Twaambo Chisamba Kayombo.png";
@@ -63,9 +56,9 @@ const teamMembers = [
 ];
 
 const Team = () => {
-  const [flipped, setFlipped] = useState<number | null>(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [flipped, setFlipped] = useState<string | null>(null);
   const [content, setContent] = useState<Record<string, string>>({});
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     api.get('/content')
@@ -74,154 +67,129 @@ const Team = () => {
   }, []);
 
   // Build team members with CMS descriptions at render time
-  const teamWithContent = [
+  const teamWithContent = useMemo(() => [
     { ...teamMembers[0], description: content.team_twaambo_desc || teamMembers[0].description },
     { ...teamMembers[1], description: content.team_tabitha_desc || teamMembers[1].description },
     { ...teamMembers[2], description: content.team_edward_desc  || teamMembers[2].description },
     { ...teamMembers[3], description: content.team_nangoma_desc || teamMembers[3].description },
     { ...teamMembers[4], description: content.team_chilufya_desc|| teamMembers[4].description },
     { ...teamMembers[5], description: content.team_lisa_desc    || teamMembers[5].description },
-  ];
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
+  ], [content]);
 
-  const handlePrevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + heroImages.length) % heroImages.length);
+  const filteredTeam = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return teamWithContent;
+    return teamWithContent.filter(
+      (m) => m.name.toLowerCase().includes(q) || m.role.toLowerCase().includes(q)
+    );
+  }, [search, teamWithContent]);
+
+  const toggleFlip = (name: string) => {
+    setFlipped(flipped === name ? null : name);
   };
 
-  const handleNextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
-  };
-
-  const toggleFlip = (index: number) => {
-    setFlipped(flipped === index ? null : index);
+  const onCardKeyDown = (e: React.KeyboardEvent, name: string) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleFlip(name);
+    }
   };
 
   return (
     <div className="bg-white overflow-x-hidden">
       {/* SEO Meta Tags */}
       <SEOHelmet pageName="team" />
-      
-      <Navbar />
+
+      <ScrollProgress />
 
       {/* Hero Section with Carousel */}
-      <section className="relative">
-        {/* Carousel Images */}
-        <div className="relative overflow-hidden">
-          {heroImages.map((image, index) => (
-            <img
-              key={index}
-              src={image}
-              alt={`Hero Banner ${index + 1}`}
-              className={`w-full h-[60vh] md:h-[80vh] object-cover brightness-75 transition-opacity duration-1000 ${
-                index === currentImageIndex ? 'opacity-100' : 'opacity-0 absolute'
-              }`}
-              loading="lazy"
-            />
-          ))}
-        </div>
-
-        {/* Navigation Buttons */}
-        <button
-          onClick={handlePrevImage}
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-white bg-opacity-50 hover:bg-opacity-75 transition rounded-full p-3 text-gray-900"
-          aria-label="Previous image"
-        >
-          <FontAwesomeIcon icon={faChevronLeft} size="lg" />
-        </button>
-        <button
-          onClick={handleNextImage}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-white bg-opacity-50 hover:bg-opacity-75 transition rounded-full p-3 text-gray-900"
-          aria-label="Next image"
-        >
-          <FontAwesomeIcon icon={faChevronRight} size="lg" />
-        </button>
-
-        {/* Carousel Indicators */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 flex gap-2">
-          {heroImages.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentImageIndex(index)}
-              className={`w-3 h-3 rounded-full transition ${
-                index === currentImageIndex ? 'bg-white' : 'bg-white bg-opacity-50 hover:bg-opacity-75'
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
-
-        {/* Content Overlay */}
-        <div className="absolute inset-0 flex items-center justify-center text-center text-white px-4">
-          <div className="w-full max-w-4xl">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 md:mb-8 leading-tight">
-              {content.team_hero_title || 'MEET OUR TEAM'}
-            </h1>
-            <p className="text-base md:text-xl text-gray-100">{content.team_section_subtitle || 'Dedicated professionals committed to transforming lives through mentorship'}</p>
-          </div>
-        </div>
-      </section>
+      <HeroCarousel>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 md:mb-8 leading-tight">
+          {content.team_hero_title || 'MEET OUR TEAM'}
+        </h1>
+        <p className="text-base md:text-xl text-gray-100">{content.team_section_subtitle || 'Dedicated professionals committed to transforming lives through mentorship'}</p>
+      </HeroCarousel>
 
       {/* Team Members Grid */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {teamWithContent.map((member, index) => (
-              <div
-                key={index}
-                className="h-96 cursor-pointer perspective"
-                onClick={() => toggleFlip(index)}
-              >
-                <div
-                  className="relative w-full h-full transition-transform duration-500 transform"
-                  style={{
-                    transformStyle: 'preserve-3d',
-                    transform: flipped === index ? 'rotateY(180deg)' : 'rotateY(0deg)',
-                  }}
-                >
-                  {/* Front of card - Image & Name */}
-                  <div
-                    className="absolute w-full h-full bg-white rounded-xl shadow-lg overflow-hidden"
-                    style={{ backfaceVisibility: 'hidden' }}
-                  >
-                    <div className="p-6 h-full flex flex-col items-center justify-center text-center bg-gradient-to-br from-orange-50 to-gray-50">
-                      <img
-                        src={member.image}
-                        alt={member.name}
-                        className="w-40 h-48 object-cover rounded-lg mx-auto mb-4 border-4 shadow-md"
-                        style={{ borderColor: '#FF9148' }}
-                      />
-                      <h4 className="text-lg font-bold text-gray-800">{member.name}</h4>
-                      <p className="font-semibold mt-2" style={{ color: '#FF9148' }}>
-                        {member.role}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-3">Click to learn more</p>
-                    </div>
-                  </div>
+          {/* Search / filter */}
+          <div className="max-w-md mx-auto mb-10">
+            <div className="relative">
+              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 10.5A6.5 6.5 0 114 10.5a6.5 6.5 0 0113 0z" />
+              </svg>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by name or role..."
+                className="w-full pl-11 pr-4 py-3 rounded-lg border border-gray-200 shadow-sm focus:border-[#FF9148] focus:ring-2 focus:ring-[#FF9148]/20 outline-none transition"
+              />
+            </div>
+          </div>
 
-                  {/* Back of card - Description */}
+          {filteredTeam.length === 0 ? (
+            <p className="text-center text-gray-500">No team members match "{search}".</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredTeam.map((member, index) => (
+                <Reveal key={member.name} delay={index * 80} className="h-96">
                   <div
-                    className="absolute w-full h-full bg-gradient-to-br rounded-xl shadow-lg overflow-hidden p-6 flex items-center justify-center"
+                    className="group h-96 cursor-pointer perspective hover:-translate-y-1 transition-transform duration-300"
+                    onClick={() => toggleFlip(member.name)}
+                    onKeyDown={(e) => onCardKeyDown(e, member.name)}
+                    tabIndex={0}
+                    role="button"
+                    aria-pressed={flipped === member.name}
+                    aria-label={`${member.name}, ${member.role}. Press to ${flipped === member.name ? 'hide' : 'show'} details.`}
+                  >
+                  <div
+                    className="relative w-full h-full transition-transform duration-500 transform"
                     style={{
-                      backfaceVisibility: 'hidden',
-                      transform: 'rotateY(180deg)',
-                      background: 'linear-gradient(135deg, #FF9148 0%, #E8722E 100%)',
+                      transformStyle: 'preserve-3d',
+                      transform: flipped === member.name ? 'rotateY(180deg)' : 'rotateY(0deg)',
                     }}
                   >
-                    <div className="text-white text-center">
-                      <h4 className="text-lg font-bold mb-3">{member.role}</h4>
-                      <p className="text-sm leading-relaxed opacity-95">{member.description}</p>
-                      <p className="text-xs mt-4 opacity-75">Click to go back</p>
+                    {/* Front of card - Image & Name */}
+                    <div
+                      className="absolute w-full h-full bg-white rounded-xl shadow-lg overflow-hidden"
+                      style={{ backfaceVisibility: 'hidden' }}
+                    >
+                      <div className="p-6 h-full flex flex-col items-center justify-center text-center bg-gradient-to-br from-orange-50 to-gray-50">
+                        <img
+                          src={member.image}
+                          alt={member.name}
+                          className="w-40 h-48 object-cover rounded-lg mx-auto mb-4 border-4 shadow-md"
+                          style={{ borderColor: '#FF9148' }}
+                        />
+                        <h4 className="text-lg font-bold text-gray-800">{member.name}</h4>
+                        <Tag className="mt-2" variant="outline">{member.role}</Tag>
+                        <p className="text-xs text-gray-500 mt-3">Click to learn more</p>
+                      </div>
+                    </div>
+
+                    {/* Back of card - Description */}
+                    <div
+                      className="absolute w-full h-full bg-gradient-to-br rounded-xl shadow-lg overflow-hidden p-6 flex items-center justify-center"
+                      style={{
+                        backfaceVisibility: 'hidden',
+                        transform: 'rotateY(180deg)',
+                        background: 'linear-gradient(135deg, #FF9148 0%, #E8722E 100%)',
+                      }}
+                    >
+                      <div className="text-white text-center">
+                        <h4 className="text-lg font-bold mb-3">{member.role}</h4>
+                        <p className="text-sm leading-relaxed opacity-95">{member.description}</p>
+                        <p className="text-xs mt-4 opacity-75">Click to go back</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

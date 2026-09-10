@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import Reveal from '../components/Reveal';
+import ScrollProgress from '../components/ScrollProgress';
+import SparkleField from '../components/SparkleField';
+import Tooltip from '../components/Tooltip';
 import { SEOHelmet } from '../hooks/useSEO';
 import api from '../services/api';
 
@@ -50,8 +53,8 @@ const About = () => {
     <div className="bg-white min-h-screen">
       {/* SEO Meta Tags */}
       <SEOHelmet pageName="about" />
-      
-      <Navbar />
+
+      <ScrollProgress />
 
       {/* Hero Section */}
       <section className="relative">
@@ -60,6 +63,7 @@ const About = () => {
           alt="About Banner"
           className="w-full h-[70vh] object-cover brightness-75"
         />
+        <SparkleField />
         <div className="absolute inset-0 flex items-center justify-center text-center text-white px-6">
           <div className="max-w-4xl">
             <h1 className="text-5xl md:text-6xl font-bold mb-4">{content.about_hero_title || 'About Us'}</h1>
@@ -148,19 +152,18 @@ const About = () => {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
             {pillars.map((pillar, idx) => (
-              <div
-                key={idx}
-                className="text-center p-6 rounded-xl border border-gray-100 shadow-md hover:shadow-lg transition"
-              >
-                <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg"
-                  style={{ background: 'linear-gradient(135deg, #FF9148, #E8722E)' }}
-                >
-                  {idx + 1}
+              <Reveal key={idx} delay={idx * 80}>
+                <div className="group text-center p-6 rounded-xl border border-gray-100 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full">
+                  <div
+                    className="icon-animate w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg"
+                    style={{ background: 'linear-gradient(135deg, #FF9148, #E8722E)' }}
+                  >
+                    {idx + 1}
+                  </div>
+                  <h4 className="font-bold text-gray-800 mb-2">{pillar.title}</h4>
+                  <p className="text-sm text-gray-500 leading-relaxed">{pillar.desc}</p>
                 </div>
-                <h4 className="font-bold text-gray-800 mb-2">{pillar.title}</h4>
-                <p className="text-sm text-gray-500 leading-relaxed">{pillar.desc}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -187,20 +190,21 @@ const About = () => {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {values.map((value, idx) => (
-              <div
-                key={idx}
-                className="rounded-xl p-6 text-center text-white shadow-lg"
-                style={{
-                  background:
-                    idx % 2 === 0
-                      ? 'linear-gradient(135deg, #FF9148, #E8722E)'
-                      : '#1f2937',
-                }}
-              >
-                <div className="text-2xl mb-3 opacity-80">{value.icon}</div>
-                <h4 className="font-bold text-lg mb-2">{value.title}</h4>
-                <p className="text-sm opacity-90 leading-relaxed">{value.desc}</p>
-              </div>
+              <Reveal key={idx} delay={idx * 80}>
+                <div
+                  className="group rounded-xl p-6 text-center text-white shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 h-full"
+                  style={{
+                    background:
+                      idx % 2 === 0
+                        ? 'linear-gradient(135deg, #FF9148, #E8722E)'
+                        : '#1f2937',
+                  }}
+                >
+                  <div className="icon-animate text-2xl mb-3 opacity-80">{value.icon}</div>
+                  <h4 className="font-bold text-lg mb-2">{value.title}</h4>
+                  <p className="text-sm opacity-90 leading-relaxed">{value.desc}</p>
+                </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -220,34 +224,45 @@ const About = () => {
 
           <div className="max-w-4xl mx-auto space-y-4">
             {faqs.map((faq, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100"
-              >
-                <button
-                  onClick={() => toggle(index)}
-                  className="w-full p-6 text-left flex justify-between items-center gap-4"
-                >
-                  <span className="text-lg font-semibold text-gray-800">{faq.question}</span>
-                  <span
-                    className="text-2xl font-light flex-shrink-0 transition-transform duration-200"
-                    style={{
-                      color: '#FF9148',
-                      transform: openIndex === index ? 'rotate(45deg)' : 'rotate(0deg)',
-                      display: 'inline-block',
-                    }}
+              <Reveal key={index} delay={index * 80}>
+                <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-gray-100">
+                  <button
+                    onClick={() => toggle(index)}
+                    className="btn-tactile w-full p-6 text-left flex justify-between items-center gap-4"
+                    aria-expanded={openIndex === index}
                   >
-                    +
-                  </span>
-                </button>
+                    <span className="text-lg font-semibold text-gray-800">{faq.question}</span>
+                    <Tooltip label={openIndex === index ? 'Collapse' : 'Expand'}>
+                      <span
+                        className="text-2xl font-light flex-shrink-0 transition-transform duration-300"
+                        style={{
+                          color: '#FF9148',
+                          transform: openIndex === index ? 'rotate(45deg)' : 'rotate(0deg)',
+                          display: 'inline-block',
+                        }}
+                      >
+                        +
+                      </span>
+                    </Tooltip>
+                  </button>
 
-                {openIndex === index && (
-                  <div className="px-6 pb-6 text-gray-600 leading-relaxed border-t border-gray-100 pt-4">
-                    {faq.answer}
+                  <div
+                    className="grid transition-[grid-template-rows] duration-300 ease-in-out"
+                    style={{ gridTemplateRows: openIndex === index ? '1fr' : '0fr' }}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="px-6 pb-6 text-gray-600 leading-relaxed border-t border-gray-100 pt-4">
+                        {faq.answer}
+                      </div>
+                    </div>
                   </div>
-                )}
-              </div>
+                </div>
+              </Reveal>
             ))}
+          </div>
+
+          <div className="sr-only-live" aria-live="polite">
+            {openIndex !== null ? `Expanded: ${faqs[openIndex].question}` : ''}
           </div>
         </div>
       </section>

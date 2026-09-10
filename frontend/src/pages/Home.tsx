@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import Reveal from '../components/Reveal';
+import ScrollProgress from '../components/ScrollProgress';
+import HeroCarousel from '../components/HeroCarousel';
+import ImpactStats from '../components/ImpactStats';
+import Tag from '../components/Tag';
+import TiltCard from '../components/TiltCard';
 import api from '../services/api';
 import { SEOHelmet } from '../hooks/useSEO';
 
@@ -13,25 +18,21 @@ import {
   faBriefcase,
   faTrophy,
   faUser,
-  faChevronLeft,
-  faChevronRight,
 } from '@fortawesome/free-solid-svg-icons';
 
-// Hero carousel images
-const heroImages = [
-  '/img/Top-Bunner-1.jpg',
-  '/img/corporate image.jpeg',
-  '/img/guiding stars team.jpg',
-  '/img/guiding stars event.jpg',
+const IMPACT_STATS = [
+  { value: 5, suffix: '', label: 'Cohorts Graduated' },
+  { value: 200, suffix: '+', label: 'Mentees Graduated' },
+  { value: 6, suffix: '', label: 'Program Team Members' },
+  { value: 3, suffix: '+', label: 'Countries Reached' },
 ];
 
 const Home = () => {
   const [content, setContent] = useState<Record<string, any>>({});
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     document.title = 'Guiding Stars - Bridging Academia and Practice';
-    
+
     // Fetch CMS content
     api.get('/content')
       .then(res => {
@@ -41,104 +42,45 @@ const Home = () => {
       .catch(err => console.error('Failed to load content:', err));
   }, []);
 
-  // Auto-rotate carousel every 5 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const handlePrevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + heroImages.length) % heroImages.length);
-  };
-
-  const handleNextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
-  };
-
   return (
     <div className="bg-white overflow-x-hidden">
       {/* SEO Meta Tags */}
       <SEOHelmet pageName="home" />
-      
-      <Navbar />
+
+      <ScrollProgress />
 
       {/* Hero Section with Carousel */}
-      <section className="relative">
-        {/* Carousel Images */}
-        <div className="relative overflow-hidden">
-          {heroImages.map((image, index) => (
-            <img
-              key={index}
-              src={image}
-              alt={`Hero Banner ${index + 1}`}
-              className={`w-full h-[60vh] md:h-[80vh] object-cover brightness-75 transition-opacity duration-1000 ${
-                index === currentImageIndex ? 'opacity-100' : 'opacity-0 absolute'
-              }`}
-              loading="lazy"
-            />
-          ))}
-        </div>
-
-        {/* Navigation Buttons */}
-        <button
-          onClick={handlePrevImage}
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-white bg-opacity-50 hover:bg-opacity-75 transition rounded-full p-3 text-gray-900"
-          aria-label="Previous image"
+      <HeroCarousel>
+        <h6
+          className="text-base md:text-2xl font-semibold uppercase mb-3 tracking-wide"
+          style={{ color: '#FF9148' }}
         >
-          <FontAwesomeIcon icon={faChevronLeft} size="lg" />
-        </button>
-        <button
-          onClick={handleNextImage}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-white bg-opacity-50 hover:bg-opacity-75 transition rounded-full p-3 text-gray-900"
-          aria-label="Next image"
-        >
-          <FontAwesomeIcon icon={faChevronRight} size="lg" />
-        </button>
+          {content.hero_subtitle || 'Ignite Success'}
+        </h6>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 md:mb-8 leading-tight">
+          {content.hero_title || 'Empowering Future Leaders Through Mentorship'}
+        </h1>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <Link
+            to="/apply"
+            className="btn-tactile inline-block text-white px-7 py-3.5 md:px-9 md:py-4.5 rounded-lg font-semibold shadow-lg transition hover:brightness-110 text-base md:text-lg bg-gradient-to-br from-[#FF9148] to-[#E8722E]"
+          >
+            APPLY NOW
+          </Link>
 
-        {/* Carousel Indicators */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 flex gap-2">
-          {heroImages.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentImageIndex(index)}
-              className={`w-3 h-3 rounded-full transition ${
-                index === currentImageIndex ? 'bg-white' : 'bg-white bg-opacity-50 hover:bg-opacity-75'
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
+          <a
+            href="#contact"
+            className="btn-tactile inline-block bg-white text-gray-900 px-7 py-3.5 md:px-9 md:py-4.5 rounded-lg font-semibold hover:bg-gray-50 active:bg-gray-100 transition shadow-lg text-base md:text-lg"
+          >
+            ENQUIRE
+          </a>
         </div>
+      </HeroCarousel>
 
-        {/* Content Overlay */}
-        <div className="absolute inset-0 flex items-center justify-center text-center text-white px-4">
-          <div className="w-full max-w-4xl">
-            <h6
-              className="text-base md:text-2xl font-semibold uppercase mb-3 tracking-wide"
-              style={{ color: '#FF9148' }}
-            >
-              {content.hero_subtitle || 'Ignite Success'}
-            </h6>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 md:mb-8 leading-tight">
-              {content.hero_title || 'Empowering Future Leaders Through Mentorship'}
-            </h1>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link
-                to="/apply"
-                className="inline-block text-white px-7 py-3.5 md:px-9 md:py-4.5 rounded-lg font-semibold shadow-lg transition hover:brightness-110 text-base md:text-lg bg-gradient-to-br from-[#FF9148] to-[#E8722E]"
-              >
-                APPLY NOW
-              </Link>
-
-              <a
-                href="#contact"
-                className="inline-block bg-white text-gray-900 px-7 py-3.5 md:px-9 md:py-4.5 rounded-lg font-semibold hover:bg-gray-50 active:bg-gray-100 transition shadow-lg text-base md:text-lg"
-              >
-                ENQUIRE
-              </a>
-            </div>
-          </div>
+      {/* Impact Stats */}
+      <section className="py-12 md:py-16 bg-gray-900">
+        <div className="container mx-auto px-6">
+          <ImpactStats stats={IMPACT_STATS} />
         </div>
       </section>
 
@@ -190,7 +132,7 @@ const Home = () => {
               <div className="pt-4 text-center md:text-left">
                 <Link
                   to="/about"
-                  className="inline-block text-white px-8 py-4 rounded-lg font-semibold transition hover:brightness-110 text-base md:text-lg bg-gradient-to-br from-[#FF9148] to-[#E8722E]"
+                  className="btn-tactile inline-block text-white px-8 py-4 rounded-lg font-semibold transition hover:brightness-110 text-base md:text-lg bg-gradient-to-br from-[#FF9148] to-[#E8722E]"
                 >
                   Read More
                 </Link>
@@ -220,22 +162,22 @@ const Home = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
-              { icon: faRoad, title: 'Personalized Guidance', desc: 'Access tailored advice from experienced industry professionals dedicated to your career and professional growth.' },
-              { icon: faUsers, title: 'Networking Opportunities', desc: 'Forge connections with industry leaders, potential employers, and like-minded peers.' },
-              { icon: faBriefcase, title: 'Industry Insights', desc: 'Dive deep into current industry trends and emerging strategies.' },
-              { icon: faTrophy, title: 'Career Advancement', desc: 'Receive mentorship focused on honing confident leadership skills.' },
-              { icon: faUser, title: 'Personal Growth', desc: 'Embark on a journey of self-discovery, learning from the life experiences of esteemed role models.' },
+              { icon: faRoad, tag: '1:1 Mentorship', title: 'Personalized Guidance', desc: 'Access tailored advice from experienced industry professionals dedicated to your career and professional growth.' },
+              { icon: faUsers, tag: 'Community', title: 'Networking Opportunities', desc: 'Forge connections with industry leaders, potential employers, and like-minded peers.' },
+              { icon: faBriefcase, tag: 'Knowledge', title: 'Industry Insights', desc: 'Dive deep into current industry trends and emerging strategies.' },
+              { icon: faTrophy, tag: 'Leadership', title: 'Career Advancement', desc: 'Receive mentorship focused on honing confident leadership skills.' },
+              { icon: faUser, tag: 'Self-Development', title: 'Personal Growth', desc: 'Embark on a journey of self-discovery, learning from the life experiences of esteemed role models.' },
             ].map((service, idx) => (
-              <div
-                key={idx}
-                className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-100"
-              >
-                <div className="text-5xl mb-5" style={{ color: '#FF9148' }}>
-                  <FontAwesomeIcon icon={service.icon} />
-                </div>
-                <h5 className="text-xl font-bold mb-4 text-gray-800">{service.title}</h5>
-                <p className="text-gray-600">{service.desc}</p>
-              </div>
+              <Reveal key={idx} delay={idx * 80}>
+                <TiltCard className="group bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl border border-gray-100 h-full">
+                  <Tag className="mb-4">{service.tag}</Tag>
+                  <div className="icon-animate text-5xl mb-5" style={{ color: '#FF9148' }}>
+                    <FontAwesomeIcon icon={service.icon} />
+                  </div>
+                  <h5 className="text-xl font-bold mb-4 text-gray-800">{service.title}</h5>
+                  <p className="text-gray-600">{service.desc}</p>
+                </TiltCard>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -244,8 +186,8 @@ const Home = () => {
       {/* Become a Mentor Section */}
       <section className="py-16 md:py-20 bg-gray-50">
         <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
-            <div className="grid md:grid-cols-2">
+          <div className="glow-border max-w-4xl mx-auto rounded-2xl">
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden grid md:grid-cols-2">
               {/* Left: Content */}
               <div className="p-8 md:p-12 flex flex-col justify-center">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
@@ -271,7 +213,7 @@ const Home = () => {
                 </div>
                 <Link
                   to="/mentor-apply"
-                  className="inline-block text-white px-8 py-3 rounded-lg font-semibold hover:brightness-110 transition bg-gradient-to-br from-[#FF9148] to-[#E8722E] w-fit"
+                  className="btn-tactile inline-block text-white px-8 py-3 rounded-lg font-semibold hover:brightness-110 transition bg-gradient-to-br from-[#FF9148] to-[#E8722E] w-fit"
                 >
                   APPLY AS A MENTOR
                 </Link>
@@ -305,7 +247,7 @@ const Home = () => {
           </p>
           <Link
             to="/apply"
-            className="inline-block bg-white px-10 py-4 md:px-12 md:py-5 rounded-lg font-bold text-lg md:text-xl hover:bg-gray-100 transition shadow-xl"
+            className="btn-tactile inline-block bg-white px-10 py-4 md:px-12 md:py-5 rounded-lg font-bold text-lg md:text-xl hover:bg-gray-100 transition shadow-xl"
             style={{ color: '#E8722E' }}
           >
             APPLY FOR MENTORSHIP
@@ -360,29 +302,28 @@ const Home = () => {
                 quote: content.testimonial_2_quote || 'My journey has been about self-discovery resulting into heightened productivity and confidence in my leadership abilities.',
               },
             ].map((t, i) => (
-              <div
-                key={i}
-                className="bg-white text-gray-800 p-8 md:p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300"
-              >
-                <div className="flex items-center mb-6">
-                  <img
-                    src={t.img}
-                    alt={t.name}
-                    className="w-16 h-20 md:w-20 md:h-24 object-cover rounded-lg mr-4 flex-shrink-0"
-                    loading="lazy"
-                  />
-                  <div>
-                    <h6 className="font-bold text-base md:text-lg text-gray-900">{t.name}</h6>
-                    <p className="text-gray-500 text-sm">Student</p>
+              <Reveal key={i} delay={i * 100}>
+                <div className="bg-white text-gray-800 p-8 md:p-8 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full">
+                  <div className="flex items-center mb-6">
+                    <img
+                      src={t.img}
+                      alt={t.name}
+                      className="w-16 h-20 md:w-20 md:h-24 object-cover rounded-lg mr-4 flex-shrink-0"
+                      loading="lazy"
+                    />
+                    <div>
+                      <h6 className="font-bold text-base md:text-lg text-gray-900">{t.name}</h6>
+                      <p className="text-gray-500 text-sm">Student</p>
+                    </div>
                   </div>
+                  <div className="flex mb-4 text-yellow-400">
+                    {[...Array(5)].map((_, idx) => (
+                      <span key={idx}>★</span>
+                    ))}
+                  </div>
+                  <p className="italic text-gray-700 leading-relaxed">"{t.quote}"</p>
                 </div>
-                <div className="flex mb-4 text-yellow-400">
-                  {[...Array(5)].map((_, idx) => (
-                    <span key={idx}>★</span>
-                  ))}
-                </div>
-                <p className="italic text-gray-700 leading-relaxed">"{t.quote}"</p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -504,8 +445,11 @@ function HomeContactForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full text-white py-4 rounded-lg font-semibold text-lg transition hover:brightness-110 bg-gradient-to-br from-[#FF9148] to-[#E8722E] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn-tactile w-full text-white py-4 rounded-lg font-semibold text-lg transition hover:brightness-110 bg-gradient-to-br from-[#FF9148] to-[#E8722E] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
+          {loading && (
+            <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          )}
           {loading ? 'SENDING...' : 'SEND MESSAGE NOW'}
         </button>
       </form>

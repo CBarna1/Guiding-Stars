@@ -1,17 +1,12 @@
-import { useEffect, useState } from 'react';
-import Navbar from '../components/Navbar';
+import { useState } from 'react';
 import Footer from '../components/Footer';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import Reveal from '../components/Reveal';
+import ImageWithSkeleton from '../components/ImageWithSkeleton';
+import ImageLightbox from '../components/ImageLightbox';
+import ScrollProgress from '../components/ScrollProgress';
+import HeroCarousel from '../components/HeroCarousel';
+import Tag from '../components/Tag';
 import { SEOHelmet } from '../hooks/useSEO';
-
-// Hero carousel images
-const heroImages = [
-  '/img/Top-Bunner-1.jpg',
-  '/img/corporate image.jpeg',
-  '/img/guiding stars team.jpg',
-  '/img/guiding stars event.jpg',
-];
 
 // Testimonials organized by cohort with images
 const testimonialsByCohort = {
@@ -119,89 +114,22 @@ const testimonialsByCohort = {
 const Testimonials = () => {
   const [selectedCohort, setSelectedCohort] = useState('cohort2');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const data = testimonialsByCohort[selectedCohort as keyof typeof testimonialsByCohort];
-
-  // Auto-rotate carousel every 5 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const handlePrevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + heroImages.length) % heroImages.length);
-  };
-
-  const handleNextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
-  };
 
   return (
     <div className="bg-white overflow-x-hidden">
       {/* SEO Meta Tags */}
       <SEOHelmet pageName="testimonials" />
-      
-      <Navbar />
+
+      <ScrollProgress />
 
       {/* Hero Section with Carousel */}
-      <section className="relative">
-        {/* Carousel Images */}
-        <div className="relative overflow-hidden">
-          {heroImages.map((image, index) => (
-            <img
-              key={index}
-              src={image}
-              alt={`Hero Banner ${index + 1}`}
-              className={`w-full h-[60vh] md:h-[80vh] object-cover brightness-75 transition-opacity duration-1000 ${
-                index === currentImageIndex ? 'opacity-100' : 'opacity-0 absolute'
-              }`}
-              loading="lazy"
-            />
-          ))}
-        </div>
-
-        {/* Navigation Buttons */}
-        <button
-          onClick={handlePrevImage}
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-white bg-opacity-50 hover:bg-opacity-75 transition rounded-full p-3 text-gray-900"
-          aria-label="Previous image"
-        >
-          <FontAwesomeIcon icon={faChevronLeft} size="lg" />
-        </button>
-        <button
-          onClick={handleNextImage}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-white bg-opacity-50 hover:bg-opacity-75 transition rounded-full p-3 text-gray-900"
-          aria-label="Next image"
-        >
-          <FontAwesomeIcon icon={faChevronRight} size="lg" />
-        </button>
-
-        {/* Carousel Indicators */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 flex gap-2">
-          {heroImages.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentImageIndex(index)}
-              className={`w-3 h-3 rounded-full transition ${
-                index === currentImageIndex ? 'bg-white' : 'bg-white bg-opacity-50 hover:bg-opacity-75'
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
-
-        {/* Content Overlay */}
-        <div className="absolute inset-0 flex items-center justify-center text-center text-white px-4">
-          <div className="w-full max-w-4xl">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 md:mb-8 leading-tight">
-              STUDENT TESTIMONIALS
-            </h1>
-            <p className="text-base md:text-xl text-gray-100">Hear from our mentees about their transformational journey</p>
-          </div>
-        </div>
-      </section>
+      <HeroCarousel>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 md:mb-8 leading-tight">
+          STUDENT TESTIMONIALS
+        </h1>
+        <p className="text-base md:text-xl text-gray-100">Hear from our mentees about their transformational journey</p>
+      </HeroCarousel>
 
       {/* Cohort Tabs */}
       <section className="py-8 bg-white">
@@ -211,7 +139,7 @@ const Testimonials = () => {
               <button
                 key={key}
                 onClick={() => setSelectedCohort(key)}
-                className={`px-6 py-3 rounded-lg font-semibold transition duration-300 ${
+                className={`btn-tactile px-6 py-3 rounded-lg font-semibold transition duration-300 ${
                   selectedCohort === key
                     ? 'text-white'
                     : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
@@ -224,6 +152,7 @@ const Testimonials = () => {
               </button>
             ))}
           </div>
+          <div className="sr-only-live" aria-live="polite">{`Showing ${data.title}`}</div>
         </div>
       </section>
 
@@ -241,18 +170,19 @@ const Testimonials = () => {
 
           <div className="space-y-12">
             {data.testimonials.map((testimonial, index) => (
-              <div
+              <Reveal
                 key={testimonial.id}
+                delay={(index % 4) * 80}
                 className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-6 items-center`}
               >
                 {/* Image */}
                 <div className="w-full lg:w-1/2 flex-shrink-0">
                   {testimonial.image && (
-                    <img
+                    <ImageWithSkeleton
                       src={testimonial.image}
                       alt={testimonial.name}
-                      className="w-full h-64 lg:h-80 object-cover rounded-lg shadow-lg cursor-pointer hover:opacity-80 transition-opacity duration-300"
-                      loading="lazy"
+                      wrapperClassName="rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
+                      className="w-full h-64 lg:h-80 object-cover cursor-pointer hover:opacity-80 transition-opacity duration-300"
                       onClick={() => setSelectedImage(testimonial.image)}
                     />
                   )}
@@ -260,7 +190,7 @@ const Testimonials = () => {
 
                 {/* Text Content */}
                 <div className="w-full lg:w-1/2">
-                  <div className="bg-white p-8 rounded-lg shadow-lg h-full flex flex-col justify-center">
+                  <div className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 h-full flex flex-col justify-center">
                     <div className="mb-4 flex text-yellow-400">
                       {[...Array(5)].map((_, i) => (
                         <span key={i}>★</span>
@@ -269,18 +199,13 @@ const Testimonials = () => {
                     <h3 className="text-lg font-bold text-gray-900 mb-1">
                       {testimonial.name}
                     </h3>
-                    <p 
-                      className="text-sm font-semibold mb-4"
-                      style={{ color: '#FF9148' }}
-                    >
-                      {testimonial.role}
-                    </p>
+                    <Tag className="mb-4">{testimonial.role}</Tag>
                     <p className="text-gray-600 leading-relaxed text-base">
                       "{testimonial.content}"
                     </p>
                   </div>
                 </div>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -297,36 +222,14 @@ const Testimonials = () => {
           </p>
           <a
             href="/apply"
-            className="inline-block text-white px-9 py-4 rounded-lg font-semibold transition hover:brightness-110 text-lg bg-gradient-to-br from-[#FF9148] to-[#E8722E]"
+            className="btn-tactile inline-block text-white px-9 py-4 rounded-lg font-semibold transition hover:brightness-110 text-lg bg-gradient-to-br from-[#FF9148] to-[#E8722E]"
           >
             Apply Now
           </a>
         </div>
       </section>
 
-      {/* Image Modal */}
-      {selectedImage && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4"
-          onClick={() => setSelectedImage(null)}
-        >
-          <div className="relative max-w-4xl max-h-[90vh] w-full">
-            <img
-              src={selectedImage}
-              alt="Full View"
-              className="w-full h-full object-contain rounded-lg"
-              onClick={(e) => e.stopPropagation()}
-            />
-            <button
-              onClick={() => setSelectedImage(null)}
-              className="absolute top-4 right-4 bg-white rounded-full p-2 hover:bg-gray-200 transition text-2xl font-bold text-gray-800"
-              aria-label="Close"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
+      <ImageLightbox src={selectedImage} onClose={() => setSelectedImage(null)} />
 
       <Footer />
     </div>

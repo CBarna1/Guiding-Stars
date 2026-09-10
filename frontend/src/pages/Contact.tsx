@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import api from '../services/api';
 import { SEOHelmet } from '../hooks/useSEO';
@@ -17,8 +16,6 @@ const Contact = () => {
     <div className="bg-white min-h-screen">
       {/* SEO Meta Tags */}
       <SEOHelmet pageName="contact" />
-      
-      <Navbar />
 
       {/* Hero Section */}
       <section className="relative">

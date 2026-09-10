@@ -6,6 +6,7 @@ import { AuthContext } from './context/AuthContext';
 // Pages & Components
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
+import ScrollToTop from './components/ScrollToTop';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
@@ -163,6 +164,7 @@ function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       {showNavbar && <Navbar />}
       <Routes>
         {/* Public routes */}
