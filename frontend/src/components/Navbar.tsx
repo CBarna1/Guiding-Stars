@@ -145,14 +145,6 @@ const Navbar = () => {
           >
             APPLY NOW
           </Link>
-
-          <Link
-            to="/login"
-            className="block text-center text-gray-300 hover:text-white py-2 text-sm transition"
-            onClick={() => setMobileOpen(false)}
-          >
-            Staff / Admin Login
-          </Link>
         </nav>
       )}
     </header>
