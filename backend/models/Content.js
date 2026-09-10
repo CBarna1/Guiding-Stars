@@ -19,7 +19,7 @@ const Content = sequelize.define('Content', {
     comment: 'Human-readable title for admin UI',
   },
   content_type: {
-    type: DataTypes.ENUM('text', 'textarea', 'image', 'video', 'json'),
+    type: DataTypes.ENUM('text', 'textarea', 'image', 'video', 'json', 'date'),
     defaultValue: 'textarea',
     comment: 'Type of content for rendering appropriate form input',
   },

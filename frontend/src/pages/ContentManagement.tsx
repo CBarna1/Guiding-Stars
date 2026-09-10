@@ -6,7 +6,7 @@ interface ContentItem {
   id: number;
   key: string;
   title: string;
-  content_type: 'text' | 'textarea' | 'image' | 'video' | 'json';
+  content_type: 'text' | 'textarea' | 'image' | 'video' | 'json' | 'date';
   value: string;
   section: string;
   description: string;
@@ -41,9 +41,25 @@ function ContentManagement() {
     { key: 'home',    label: 'Home' },
     { key: 'about',   label: 'About' },
     { key: 'team',    label: 'Team' },
+    { key: 'apply',   label: 'Apply' },
     { key: 'contact', label: 'Contact' },
     { key: 'global',  label: 'Global / Footer' },
   ];
+
+  // datetime-local inputs need "YYYY-MM-DDTHH:mm" in the browser's local time;
+  // stored values are ISO strings, so convert both directions.
+  const isoToLocalInput = (iso: string) => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+  const localInputToIso = (local: string) => {
+    if (!local) return '';
+    const d = new Date(local);
+    return isNaN(d.getTime()) ? '' : d.toISOString();
+  };
 
   useEffect(() => {
     // Load all content once on mount. UI filters locally by page/section.
@@ -241,6 +257,7 @@ function ContentManagement() {
                   <option value="image">Image</option>
                   <option value="video">Video (Vimeo/YouTube URL)</option>
                   <option value="json">JSON</option>
+                  <option value="date">Date & Time</option>
                 </select>
               </div>
               <div>
@@ -328,6 +345,16 @@ function ContentManagement() {
                   onChange={(e) => setFormData({ ...formData, value: e.target.value })}
                   className="w-full px-3 py-2 border rounded h-32"
                 />
+              ) : formData.content_type === 'date' ? (
+                <div>
+                  <input
+                    type="datetime-local"
+                    value={isoToLocalInput(formData.value)}
+                    onChange={(e) => setFormData({ ...formData, value: localInputToIso(e.target.value) })}
+                    className="w-full px-3 py-2 border rounded"
+                  />
+                  <p className="text-xs text-gray-500 mt-2">Leave blank for "always open" (no countdown).</p>
+                </div>
               ) : (
                 <input
                   type="text"
@@ -417,6 +444,16 @@ function ContentManagement() {
                           placeholder="https://vimeo.com/123456789"
                         />
                         <p className="text-xs text-gray-500 mt-2">Paste Vimeo or YouTube embed URL</p>
+                      </div>
+                    ) : item.content_type === 'date' ? (
+                      <div>
+                        <input
+                          type="datetime-local"
+                          value={isoToLocalInput(formData.value)}
+                          onChange={(e) => setFormData({ ...formData, value: localInputToIso(e.target.value) })}
+                          className="w-full px-3 py-2 border rounded"
+                        />
+                        <p className="text-xs text-gray-500 mt-2">Leave blank for "always open" (no countdown).</p>
                       </div>
                     ) : (
                       <input
@@ -512,6 +549,10 @@ function ContentManagement() {
                       </div>
                     ) : item.content_type === 'json' ? (
                       <pre className="text-xs overflow-auto">{item.value}</pre>
+                    ) : item.content_type === 'date' ? (
+                      <p className="text-gray-700">
+                        {item.value ? new Date(item.value).toLocaleString() : 'Not set (applications open now)'}
+                      </p>
                     ) : (
                       <p className="text-gray-700 whitespace-pre-wrap">{item.value}</p>
                     )}

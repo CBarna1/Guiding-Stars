@@ -1,8 +1,9 @@
-const { Mentee, Mentor, User } = require('../models/index'); 
+const { Mentee, Mentor, User, Content } = require('../models/index');
 const bcrypt = require('bcryptjs');
 const { Op } = require('sequelize');
 const crypto = require('crypto');
 const { sendWelcomeEmail, sendRejectionEmail } = require('../services/emailService');
+const { verifyCaptcha } = require('../utils/captcha');
 
 // Helper for token generation
 const generateVerificationToken = () => crypto.randomBytes(32).toString('hex');
@@ -41,11 +42,24 @@ exports.getMenteeById = async (req, res) => {
  */
 exports.createMentee = async (req, res) => {
   try {
-    const { first_name, last_name, email, phone, background, goals, preferences } = req.body;
+    const { first_name, last_name, email, phone, background, goals, preferences, captcha_token, captcha_answer } = req.body;
 
     // Validate required fields
     if (!first_name || !last_name || !email) {
       return res.status(400).json({ success: false, message: 'First name, last name, and email are required.' });
+    }
+
+    if (!verifyCaptcha(captcha_token, captcha_answer)) {
+      return res.status(400).json({ success: false, message: 'Incorrect or expired captcha answer. Please try again.' });
+    }
+
+    // Reject if the admin has set a future application-open date
+    const openDateField = await Content.findOne({ where: { key: 'apply_open_date' } });
+    if (openDateField && openDateField.value) {
+      const openDate = new Date(openDateField.value);
+      if (!isNaN(openDate.getTime()) && new Date() < openDate) {
+        return res.status(403).json({ success: false, message: 'Applications are not open yet.' });
+      }
     }
 
     const existingMentee = await Mentee.findOne({ where: { email } });

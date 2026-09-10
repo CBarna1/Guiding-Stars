@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import Navbar from '../components/Navbar';
+import React, { useEffect, useRef, useState } from 'react';
 import Footer from '../components/Footer';
+import ApplicationCountdown from '../components/ApplicationCountdown';
+import MathCaptcha, { type MathCaptchaHandle } from '../components/MathCaptcha';
 import api from '../services/api';
 import { SEOHelmet } from '../hooks/useSEO';
 
@@ -18,6 +19,28 @@ const ApplyPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const [checkingWindow, setCheckingWindow] = useState(true);
+  const [openDate, setOpenDate] = useState<Date | null>(null);
+
+  const [captchaAnswer, setCaptchaAnswer] = useState('');
+  const [captchaToken, setCaptchaToken] = useState('');
+  const captchaRef = useRef<MathCaptchaHandle>(null);
+
+  useEffect(() => {
+    api.get('/content')
+      .then(res => {
+        const value = res.data?.data?.apply_open_date;
+        if (value) {
+          const date = new Date(value);
+          if (!isNaN(date.getTime()) && date.getTime() > Date.now()) {
+            setOpenDate(date);
+          }
+        }
+      })
+      .catch(err => console.error('Failed to load content:', err))
+      .finally(() => setCheckingWindow(false));
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError('');
@@ -28,8 +51,6 @@ const ApplyPage = () => {
     setLoading(true);
     setError('');
 
-    console.log('Sending data:', formData);
-
     try {
       const response = await api.post('/mentees', {
         first_name: formData.first_name,
@@ -38,20 +59,20 @@ const ApplyPage = () => {
         phone: formData.phone,
         background: formData.background,
         goals: formData.goals,
-        preferences: formData.preferences
+        preferences: formData.preferences,
+        captcha_token: captchaToken,
+        captcha_answer: captchaAnswer,
       });
-
-      console.log('Response:', response.data);
 
       if (response.data.success) {
         setSubmitted(true);
       }
     } catch (err: any) {
-      console.error('Full error:', err);
       const errorMsg = err.response?.data?.message ||
                        err.response?.data?.error ||
                        'Something went wrong. Please try again.';
       setError(errorMsg);
+      captchaRef.current?.refresh();
     } finally {
       setLoading(false);
     }
@@ -72,7 +93,6 @@ const ApplyPage = () => {
   if (submitted) {
     return (
       <>
-        <Navbar />
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 mt-20">
           <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl border border-gray-200">
             <div className="text-center">
@@ -112,12 +132,19 @@ const ApplyPage = () => {
     );
   }
 
+  if (checkingWindow) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-10 h-10 border-4 border-gray-200 border-t-[#FF9148] rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <>
       {/* SEO Meta Tags */}
       <SEOHelmet pageName="apply" />
-      
-      <Navbar />
+
       <div
         className="min-h-screen py-12 px-4"
         style={{
@@ -127,7 +154,9 @@ const ApplyPage = () => {
           backgroundPosition: 'center'
         }}
       >
-        
+        {openDate ? (
+          <ApplicationCountdown targetDate={openDate} onComplete={() => setOpenDate(null)} />
+        ) : (
         <div className="max-w-2xl mx-auto bg-white shadow-2xl rounded-2xl overflow-hidden relative z-10">
 
           {/* Form Header */}
@@ -278,6 +307,17 @@ const ApplyPage = () => {
               />
             </div>
 
+            {/* Captcha */}
+            <MathCaptcha
+              ref={captchaRef}
+              answer={captchaAnswer}
+              onAnswerChange={setCaptchaAnswer}
+              onTokenChange={setCaptchaToken}
+              inputClassName={`${inputClass} max-w-[7rem]`}
+              inputFocus={inputFocus}
+              inputBlur={inputBlur}
+            />
+
             {/* Submit Button */}
             <button
               type="submit"
@@ -304,6 +344,7 @@ const ApplyPage = () => {
 
           </form>
         </div>
+        )}
       </div>
 
       <Footer />
